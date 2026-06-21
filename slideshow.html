@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bo & Bentes kobberbryllup — Slideshow</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--copper:#B87333;--copper-shine:#E8B87A;--copper-dark:#7A4D1D;--dark:#0F0C09}
+html,body{width:100%;height:100%;background:var(--dark);overflow:hidden;font-family:'DM Sans',sans-serif;color:white}
+.header{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.5rem 3rem 1rem;display:flex;flex-direction:column;align-items:center;background:linear-gradient(to bottom,rgba(15,12,9,0.95) 60%,transparent)}
+.header-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-style:italic;color:var(--copper-shine);letter-spacing:0.02em}
+.header-sub{font-size:0.78rem;color:rgba(255,255,255,0.3);margin-top:0.3rem;letter-spacing:0.1em;font-weight:300}
+.copper-bar{width:50px;height:1px;background:linear-gradient(90deg,transparent,var(--copper),transparent);margin:0.5rem auto 0}
+.stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.pile{position:relative;display:flex;align-items:center;justify-content:center}
+.back-card{position:absolute;background:white;box-shadow:0 8px 40px rgba(0,0,0,0.8)}
+.b1{width:55vh;height:70vh;transform:rotate(-6deg) translate(-20px,14px);opacity:0.18}
+.b2{width:55vh;height:70vh;transform:rotate(4.5deg) translate(16px,10px);opacity:0.14}
+.b3{width:55vh;height:70vh;transform:rotate(-2deg) translate(-8px,5px);opacity:0.10}
+.active-wrap{position:relative;z-index:10;transform:rotate(-1.5deg);box-shadow:0 16px 60px rgba(0,0,0,0.8)}
+.active-wrap img{display:block;max-height:75vh;max-width:60vw;width:auto;height:auto}
+@keyframes slideIn{from{opacity:0;transform:rotate(-1.5deg) scale(0.95)}to{opacity:1;transform:rotate(-1.5deg) scale(1)}}
+.active-wrap.animating{animation:slideIn 0.8s ease forwards}
+.empty-card{width:45vh;height:60vh;background:white;display:flex;align-items:center;justify-content:center;padding:2rem;text-align:center}
+.empty-card p{font-family:'Playfair Display',serif;font-style:italic;color:#aaa;font-size:1rem}
+.counter{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:100}
+.dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.2);transition:background 0.3s}
+.dot.active{background:var(--copper)}
+.progress-bar{position:fixed;bottom:0;left:0;height:2px;background:linear-gradient(90deg,var(--copper-dark),var(--copper-shine));width:0%;z-index:100}
+.qr-hint{position:fixed;bottom:3rem;right:2rem;text-align:right;z-index:100}
+.qr-hint p{font-size:0.7rem;color:rgba(255,255,255,0.18);letter-spacing:0.05em;line-height:1.7}
+.error{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-style:italic;color:rgba(255,255,255,0.3);font-size:1.2rem}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">Bo & Bentes kobberbryllup</div>
+  <div class="copper-bar"></div>
+  <div class="header-sub">SCAN QR-KODEN OG UPLOAD DINE BILLEDER FRA AFTENEN</div>
+</div>
+
+<div class="stage">
+  <div class="pile">
+    <div class="back-card b1"></div>
+    <div class="back-card b2"></div>
+    <div class="back-card b3"></div>
+    <div class="active-wrap" id="active-wrap">
+      <div class="empty-card" id="empty-card"><p>Venter på<br>de første billeder…</p></div>
+      <img id="active-img" src="" alt="" style="display:none">
+    </div>
+  </div>
+</div>
+
+<div class="counter" id="counter"></div>
+<div class="progress-bar" id="progress-bar"></div>
+<div class="qr-hint"><p>Upload dine billeder<br>og se dem her live</p></div>
+
+<script>
+const INTERVAL = 8000;
+let photos = [], current = 0, timer = null, sessionToken = '';
+
+function getKey() {
+  return new URLSearchParams(window.location.search).get('key') || '';
+}
+
+async function init() {
+  const key = getKey();
+  if (!key) {
+    document.body.innerHTML = '<div class="error">Mangler adgangsnøgle</div>';
+    return;
+  }
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ password: key, name: 'Slideshow' })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.token) {
+      document.body.innerHTML = '<div class="error">Forkert adgangsnøgle</div>';
+      return;
+    }
+    sessionToken = data.token;
+    await fetchPhotos();
+    renderSlide(current, false);
+    if (timer) clearInterval(timer);
+    timer = setInterval(next, INTERVAL);
+  } catch(e) {
+    document.body.innerHTML = '<div class="error">Kunne ikke forbinde til serveren</div>';
+  }
+}
+
+async function fetchPhotos() {
+  try {
+    const res = await fetch('/api/photos?token=' + sessionToken);
+    if (res.ok) {
+      const data = await res.json();
+      photos = data.filter(p => !p.noScreen);
+    }
+  } catch(e) {}
+}
+
+function renderSlide(idx, animate) {
+  const wrap = document.getElementById('active-wrap');
+  const img = document.getElementById('active-img');
+  const empty = document.getElementById('empty-card');
+  if (!photos.length) {
+    img.style.display = 'none';
+    empty.style.display = 'flex';
+    document.getElementById('counter').innerHTML = '';
+    document.getElementById('progress-bar').style.width = '0%';
+    return;
+  }
+  const p = photos[idx % photos.length];
+  empty.style.display = 'none';
+  img.style.display = 'block';
+  if (animate) { wrap.classList.remove('animating'); void wrap.offsetWidth; wrap.classList.add('animating'); }
+  img.src = p.url;
+  const counter = document.getElementById('counter');
+  const max = Math.min(photos.length, 14);
+  counter.innerHTML = '';
+  for (let i = 0; i < max; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === idx % max ? ' active' : '');
+    counter.appendChild(d);
+  }
+  const bar = document.getElementById('progress-bar');
+  bar.style.transition = 'none'; bar.style.width = '0%'; void bar.offsetWidth;
+  bar.style.transition = `width ${INTERVAL}ms linear`; bar.style.width = '100%';
+}
+
+async function next() {
+  await fetchPhotos();
+  if (photos.length) current = (current + 1) % photos.length;
+  renderSlide(current, true);
+}
+
+init();
+
+document.addEventListener('keydown', e => {
+  if (!photos.length) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    clearInterval(timer);
+    current = (current + 1) % photos.length;
+    renderSlide(current, true);
+    timer = setInterval(next, INTERVAL);
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    clearInterval(timer);
+    current = (current - 1 + photos.length) % photos.length;
+    renderSlide(current, true);
+    timer = setInterval(next, INTERVAL);
+  }
+});
+</script>
+</body>
+</html>

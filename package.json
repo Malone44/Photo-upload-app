@@ -1,0 +1,17 @@
+{
+  "name": "kobberbryllup",
+  "version": "2.0.0",
+  "description": "Foto-upload app til Bo & Bentes kobberbryllup",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.33.2",
+    "uuid": "^9.0.0"
+  }
+}

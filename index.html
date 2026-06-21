@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Bo & Bentes kobberbryllup</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=Satisfy&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --copper:#B87333;--copper-light:#D4956A;--copper-shine:#E8B87A;--copper-dark:#7A4D1D;
+  --cream:#FAF6F0;--dark:#1A1410;--card:#FFFEF9;
+}
+html,body{font-family:'DM Sans',sans-serif;background:var(--dark);min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+.bg-overlay{position:absolute;inset:0;background:rgba(20,14,10,0.78);z-index:1}
+.polaroid{position:absolute;background:white;padding:6px 6px 22px;box-shadow:0 3px 16px rgba(0,0,0,0.5)}
+
+.phone-frame{position:relative;z-index:10;width:390px;max-width:100vw;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:16px 20px 24px}
+
+.step{display:none;animation:stepIn 0.35s ease}
+.step.active{display:flex;flex-direction:column;justify-content:center;min-height:100dvh;padding:2rem 0}
+@keyframes stepIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+.card{background:var(--card);border-radius:20px;padding:2rem 1.5rem;box-shadow:0 8px 48px rgba(0,0,0,0.45),0 0 0 1px rgba(184,115,51,0.12)}
+.copper-line{width:40px;height:2px;background:linear-gradient(90deg,var(--copper-dark),var(--copper-shine),var(--copper-dark));margin:0.6rem auto 0;border-radius:1px}
+.card-icon{font-size:2.2rem;margin-bottom:0.4rem;text-align:center}
+.card h1{font-family:'Playfair Display',serif;font-size:1.75rem;color:var(--dark);line-height:1.25;text-align:center}
+.card h1 em{font-style:italic;color:var(--copper)}
+.card p{font-size:0.9rem;color:#6B5E52;line-height:1.65;margin-top:0.75rem;text-align:center}
+
+.input-wrap{margin-top:1.5rem}
+.input-wrap input{width:100%;padding:1rem 1.25rem;border:1.5px solid #E8DDD4;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:1rem;background:white;color:var(--dark);outline:none;transition:border 0.2s;text-align:center;-webkit-appearance:none}
+.input-wrap input:focus{border-color:var(--copper)}
+.input-wrap input::placeholder{color:#C4B8AE}
+.error-msg{color:#B04040;font-size:0.82rem;margin-top:0.6rem;text-align:center;display:none}
+
+.name-row{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-top:1.5rem}
+.name-row input{width:100%;padding:0.95rem 0.75rem;border:1.5px solid #E8DDD4;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:0.95rem;background:white;color:var(--dark);outline:none;transition:border 0.2s;text-align:center;-webkit-appearance:none}
+.name-row input:focus{border-color:var(--copper)}
+
+.polaroid-preview{background:white;padding:8px 8px 40px;margin:1.5rem auto 0;width:160px;box-shadow:0 4px 20px rgba(0,0,0,0.12);transform:rotate(-1.5deg);transition:transform 0.3s ease}
+.polaroid-preview:hover{transform:rotate(0deg) scale(1.03)}
+.preview-photo{width:100%;aspect-ratio:1;background:linear-gradient(135deg,#c8b89a,#a89070);border-radius:1px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.35);font-size:0.65rem;font-family:'DM Sans',sans-serif}
+.preview-text{margin-top:5px;text-align:center;line-height:1.55}
+.preview-event{font-family:'Satisfy',cursive;font-size:8.5px;color:#2a2018}
+.preview-time{font-family:'Satisfy',cursive;font-size:8px;color:#7A6A5E}
+.preview-name{font-family:'Satisfy',cursive;font-size:9.5px;color:var(--copper-dark);margin-top:1px}
+
+.btn-copper{width:100%;margin-top:1.5rem;padding:1.05rem;border:none;border-radius:50px;background:linear-gradient(135deg,var(--copper-dark),var(--copper),var(--copper-shine));color:white;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:500;letter-spacing:0.04em;cursor:pointer;transition:opacity 0.2s,transform 0.1s;-webkit-appearance:none;min-height:52px}
+.btn-copper:active{transform:scale(0.97);opacity:0.9}
+.btn-copper:disabled{opacity:0.35;cursor:default}
+
+.features{display:flex;flex-direction:column;gap:0.9rem;margin-top:1.5rem;text-align:left}
+.feature{display:flex;align-items:flex-start;gap:0.75rem}
+.feature-icon{width:36px;height:36px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#FDF0E4,#F5E0C8);display:flex;align-items:center;justify-content:center;font-size:16px}
+.feature-text{font-size:0.87rem;color:#5A4E46;line-height:1.5;padding-top:2px}
+.feature-text strong{color:var(--dark);font-weight:500;display:block;margin-bottom:1px}
+
+.user-tag{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#FDF0E4,#F5E0C8);border:1px solid rgba(184,115,51,0.25);border-radius:50px;padding:0.3rem 0.9rem;font-family:'Satisfy',cursive;font-size:1rem;color:var(--copper-dark);margin-bottom:0.75rem}
+
+.upload-area{border:1.5px dashed #D4C4B4;border-radius:14px;padding:1.75rem 1rem;text-align:center;cursor:pointer;position:relative;transition:all 0.2s;background:#FDFAF6;margin-top:1rem;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.upload-area:active{border-color:var(--copper);background:#FDF5EC}
+.upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-area .upload-icon{font-size:2rem;margin-bottom:0.4rem}
+.upload-area p{font-size:0.85rem;color:#8A7B6F}
+.upload-area .upload-title{font-size:0.92rem;font-weight:500;color:#3A2E28;margin-bottom:2px}
+
+.preview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.4rem;margin-top:0.75rem}
+.preview-item{aspect-ratio:1;border-radius:8px;overflow:hidden;background:#E8DDD4;position:relative}
+.preview-item img{width:100%;height:100%;object-fit:cover}
+
+.toggle-row{display:flex;align-items:center;gap:0.75rem;margin-top:1rem;padding:0.85rem 1rem;background:#FAF6F0;border-radius:12px}
+.toggle{position:relative;width:44px;height:26px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:#D4C4B4;border-radius:13px;cursor:pointer;transition:0.2s}
+.toggle-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:white;border-radius:50%;transition:0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle input:checked+.toggle-slider{background:var(--copper)}
+.toggle input:checked+.toggle-slider:before{transform:translateX(18px)}
+.toggle-text{font-size:0.84rem;color:#5A4E46;line-height:1.4}
+.toggle-text span{display:block;font-size:0.76rem;color:#8A7B6F;margin-top:1px}
+
+.progress-wrap{margin-top:1.25rem;display:none}
+.progress-bar-bg{background:#E8DDD4;border-radius:1rem;height:6px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--copper-dark),var(--copper-shine));border-radius:1rem;transition:width 0.3s;width:0%}
+.progress-label{font-size:0.8rem;color:#8A7B6F;margin-top:0.5rem;text-align:center}
+
+.success-card{text-align:center}
+.btn-outline{width:100%;margin-top:0.75rem;padding:0.9rem;border:1.5px solid var(--copper);background:transparent;color:var(--copper);border-radius:50px;font-family:'DM Sans',sans-serif;font-size:0.92rem;cursor:pointer;min-height:50px}
+</style>
+</head>
+<body>
+
+<div class="bg" id="bg"><div class="bg-overlay"></div></div>
+
+<div class="phone-frame">
+
+  <!-- STEP 1: KODEORD -->
+  <div class="step active" id="step-password">
+    <div class="card">
+      <div class="card-icon">🥂</div>
+      <h1>Bo & Bentes<br><em>kobberbryllup</em></h1>
+      <div class="copper-line"></div>
+      <p>Velkommen! Skriv kodeordet for at komme ind.</p>
+      <div class="input-wrap">
+        <input type="password" id="pw" placeholder="kodeord" autocomplete="off"
+          onkeydown="if(event.key==='Enter')goToWelcome()">
+        <div class="error-msg" id="pw-error">Forkert kodeord — prøv igen</div>
+      </div>
+      <button class="btn-copper" onclick="goToWelcome()">Kom ind →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: VELKOMST -->
+  <div class="step" id="step-welcome">
+    <div class="card">
+      <div class="card-icon">📸</div>
+      <h1>Tak fordi<br>du er med!</h1>
+      <div class="copper-line"></div>
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon">📷</div>
+          <div class="feature-text"><strong>Upload dine billeder</strong>Fra aftenen — uanset om det er ét eller mange.</div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🖼️</div>
+          <div class="feature-text"><strong>Polaroid-ramme</strong>Hvert billede får en ramme med dit navn og tidspunkt.</div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">✨</div>
+          <div class="feature-text"><strong>Storskærmen</strong>Billederne vises live — du bestemmer selv om du vil med.</div>
+        </div>
+      </div>
+      <button class="btn-copper" onclick="setStep('step-name')">Fortsæt →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: NAVN -->
+  <div class="step" id="step-name">
+    <div class="card">
+      <div class="card-icon" style="font-size:1.6rem">✍️</div>
+      <h1>Hvad hedder du?</h1>
+      <div class="copper-line"></div>
+      <p>Dit navn kommer på dine polaroid-billeder.</p>
+      <div class="name-row">
+        <input type="text" id="firstname" placeholder="Fornavn" autocomplete="given-name" oninput="updatePreview()" inputmode="text">
+        <input type="text" id="lastname" placeholder="Efternavn" autocomplete="family-name" oninput="updatePreview()" inputmode="text">
+      </div>
+      <div class="polaroid-preview">
+        <div class="preview-photo">dit billede</div>
+        <div class="preview-text">
+          <div class="preview-event">Bo & Bentes kobberbryllup</div>
+          <div class="preview-time" id="preview-time"></div>
+          <div class="preview-name" id="preview-name">— dit navn</div>
+        </div>
+      </div>
+      <button class="btn-copper" id="name-btn" onclick="doLogin()" disabled>Gem navn →</button>
+      <div class="error-msg" id="login-error">Noget gik galt — prøv igen</div>
+    </div>
+  </div>
+
+  <!-- STEP 4: UPLOAD -->
+  <div class="step" id="step-upload">
+    <div class="card">
+      <div style="text-align:center"><div class="user-tag" id="user-tag">✦ dit navn</div></div>
+      <h1 style="text-align:center;font-size:1.5rem">Upload dine billeder</h1>
+      <p>Vælg ét eller flere billeder fra aftenen.</p>
+      <div class="upload-area" id="upload-area">
+        <input type="file" accept="image/*" multiple id="file-input" onchange="handleFiles(this.files)">
+        <div class="upload-icon">🖼️</div>
+        <div class="upload-title">Tryk for at vælge</div>
+        <p>billeder fra kamerarulle</p>
+      </div>
+      <div class="preview-grid" id="preview-grid"></div>
+      <div class="toggle-row" id="toggle-row" style="display:none">
+        <label class="toggle">
+          <input type="checkbox" id="no-screen">
+          <span class="toggle-slider"></span>
+        </label>
+        <div class="toggle-text">
+          Vis ikke på storskærmen
+          <span>Gemmes stadig til Bo & Bente</span>
+        </div>
+      </div>
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+        <div class="progress-label" id="progress-label">Uploader...</div>
+      </div>
+      <button class="btn-copper" id="upload-btn" onclick="doUpload()" style="display:none">Send billeder ↑</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: SUCCESS -->
+  <div class="step" id="step-success">
+    <div class="card success-card">
+      <div class="card-icon" style="font-size:3rem">🎉</div>
+      <h1>Billeder sendt!</h1>
+      <div class="copper-line"></div>
+      <p>Tak — dine billeder er nu med i samlingen og dukker snart op på storskærmen.</p>
+      <button class="btn-copper" onclick="uploadMore()">Upload flere billeder</button>
+      <button class="btn-outline" onclick="uploadMore()">Vælg fra kamerarulle</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let sessionToken = '';
+let guestName = '';
+let pendingPassword = '';
+let selectedFiles = [];
+
+function setStep(id) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// Trin 1: gem kodeord midlertidigt og gå til velkomst
+function goToWelcome() {
+  const pw = document.getElementById('pw').value.trim();
+  if (pw.length < 3) {
+    document.getElementById('pw-error').style.display = 'block';
+    return;
+  }
+  pendingPassword = pw;
+  const now = new Date();
+  document.getElementById('preview-time').textContent =
+    now.toLocaleString('da-DK', {day:'numeric', month:'short'}) + '  ·  ' +
+    now.toLocaleString('da-DK', {hour:'2-digit', minute:'2-digit'});
+  setStep('step-welcome');
+}
+
+function updatePreview() {
+  const fn = document.getElementById('firstname').value.trim();
+  const ln = document.getElementById('lastname').value.trim();
+  const initial = ln ? ln[0].toUpperCase() + '.' : '';
+  document.getElementById('preview-name').textContent =
+    fn ? (initial ? `— ${fn} ${initial}` : `— ${fn}`) : '— dit navn';
+  document.getElementById('name-btn').disabled = fn.length < 2;
+}
+
+// Trin 3: send login til API med password + name
+async function doLogin() {
+  const fn = document.getElementById('firstname').value.trim();
+  const ln = document.getElementById('lastname').value.trim();
+  const initial = ln ? ln[0].toUpperCase() + '.' : '';
+  guestName = initial ? `${fn} ${initial}` : fn;
+
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  document.getElementById('name-btn').disabled = true;
+  document.getElementById('name-btn').textContent = 'Logger ind...';
+
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({password: pendingPassword, name: guestName})
+    });
+    const data = await res.json();
+    if (res.ok && data.token) {
+      sessionToken = data.token;
+      document.getElementById('user-tag').textContent = `✦ ${guestName}`;
+      setStep('step-upload');
+    } else {
+      errEl.textContent = data.error || 'Forkert kodeord — gå tilbage og prøv igen';
+      errEl.style.display = 'block';
+      document.getElementById('name-btn').disabled = false;
+      document.getElementById('name-btn').textContent = 'Gem navn →';
+    }
+  } catch(e) {
+    errEl.textContent = 'Kunne ikke forbinde til serveren';
+    errEl.style.display = 'block';
+    document.getElementById('name-btn').disabled = false;
+    document.getElementById('name-btn').textContent = 'Gem navn →';
+  }
+}
+
+function handleFiles(files) {
+  selectedFiles = Array.from(files);
+  const grid = document.getElementById('preview-grid');
+  grid.innerHTML = '';
+  selectedFiles.forEach(f => {
+    const url = URL.createObjectURL(f);
+    const div = document.createElement('div');
+    div.className = 'preview-item';
+    div.innerHTML = `<img src="${url}" alt="">`;
+    grid.appendChild(div);
+  });
+  const has = selectedFiles.length > 0;
+  document.getElementById('toggle-row').style.display = has ? 'flex' : 'none';
+  document.getElementById('upload-btn').style.display = has ? 'block' : 'none';
+}
+
+async function doUpload() {
+  if (!selectedFiles.length) return;
+  const noScreen = document.getElementById('no-screen').checked;
+
+  const progressWrap = document.getElementById('progress-wrap');
+  const fill = document.getElementById('progress-fill');
+  const label = document.getElementById('progress-label');
+  progressWrap.style.display = 'block';
+  document.getElementById('upload-btn').style.display = 'none';
+
+  const fd = new FormData();
+  selectedFiles.forEach(f => fd.append('photos', f));
+  fd.append('token', sessionToken);
+  fd.append('noScreen', String(noScreen));
+
+  label.textContent = `Sender ${selectedFiles.length} billede${selectedFiles.length > 1 ? 'r' : ''}...`;
+  fill.style.width = '30%';
+
+  try {
+    const res = await fetch('/api/upload', {method: 'POST', body: fd});
+    fill.style.width = '100%';
+    const data = await res.json();
+    if (res.ok) {
+      label.textContent = `${data.count} billede${data.count > 1 ? 'r' : ''} uploadet!`;
+      setTimeout(() => setStep('step-success'), 800);
+    } else {
+      label.textContent = 'Fejl: ' + (data.error || 'prøv igen');
+      document.getElementById('upload-btn').style.display = 'block';
+    }
+  } catch(e) {
+    label.textContent = 'Kunne ikke forbinde — prøv igen';
+    document.getElementById('upload-btn').style.display = 'block';
+  }
+}
+
+function uploadMore() {
+  selectedFiles = [];
+  document.getElementById('preview-grid').innerHTML = '';
+  document.getElementById('toggle-row').style.display = 'none';
+  document.getElementById('upload-btn').style.display = 'none';
+  document.getElementById('progress-wrap').style.display = 'none';
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('no-screen').checked = false;
+  document.getElementById('file-input').value = '';
+  setStep('step-upload');
+}
+
+// Polaroid baggrund
+(function makeBg() {
+  const bg = document.getElementById('bg');
+  const configs = [
+    {w:100,h:100,x:'-8%',y:'5%',r:-14,o:0.5},{w:88,h:88,x:'72%',y:'3%',r:9,o:0.45},
+    {w:105,h:105,x:'60%',y:'60%',r:-8,o:0.5},{w:92,h:92,x:'-4%',y:'65%',r:7,o:0.45},
+    {w:80,h:80,x:'30%',y:'80%',r:-5,o:0.4},{w:96,h:96,x:'78%',y:'35%',r:12,o:0.45},
+    {w:85,h:85,x:'15%',y:'-2%',r:4,o:0.4},
+  ];
+  const colors = ['#c8b89a','#b5a48a','#d4c4a8','#a89878','#c0aa90'];
+  configs.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'polaroid';
+    el.style.cssText = `width:${c.w}px;left:${c.x};top:${c.y};transform:rotate(${c.r}deg);opacity:${c.o}`;
+    el.innerHTML = `<div style="height:${c.h}px;background:${colors[Math.floor(Math.random()*colors.length)]}"></div>`;
+    bg.insertBefore(el, bg.firstChild);
+  });
+})();
+
+document.getElementById('pw').focus();
+</script>
+</body>
+</html>
