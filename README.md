@@ -1,4 +1,4 @@
-# 📸 Bo & Bentes kobberbryllup — foto-app v2
+#Foto-app v2
 
 ## Installation på Ubuntu-serveren
 
