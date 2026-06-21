@@ -72,7 +72,7 @@ pm2 startup && pm2 save
 ---
 
 ## Efter festen
-Alle billeder ligger i `uploads/` — kopier mappen til Bo & Bentes computer:
+Alle billeder ligger i `uploads/` — kopier mappen til computer:
 ```bash
 scp -r bruger@SERVER-IP:~/kobberbryllup/uploads/ ./kobberbryllup-billeder/
 ```
